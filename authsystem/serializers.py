@@ -3,10 +3,6 @@ from rest_framework import serializers
 from .models import CustomUser
 
 
-
-
-
-
 class RegisterUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     class Meta:
@@ -27,3 +23,9 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         user.is_active=False
         user.save()
         return user
+    
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'email', 'name', 'phone', 'role', 'address', 'profile', 'is_active']
+        read_only_fields = ['id', 'username', 'email', 'is_active']

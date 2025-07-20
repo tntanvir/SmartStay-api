@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'corsheaders',
 
     'authsystem',
+    'room',
+    'reviews',
     
 ]
 REST_FRAMEWORK = {

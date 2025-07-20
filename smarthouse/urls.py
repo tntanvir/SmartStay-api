@@ -22,5 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',Home),
     path('auth/', include('authsystem.urls')),
+    path('room/', include('room.urls')),
+    path('review/', include('reviews.urls')),
     # re_path(r'^.*$', Custom_Endpoint),
 ]
