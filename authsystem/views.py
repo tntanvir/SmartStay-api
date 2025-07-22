@@ -2,12 +2,13 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from .serializers import RegisterUserSerializer
+from .serializers import RegisterUserSerializer,UserSerializer
 from .models import CustomUser,EmailOTP
 from django.contrib.auth import authenticate, login
 from rest_framework_simplejwt.tokens import RefreshToken
 from .utils import send_otp_to_email
 from django.conf import settings
+from rest_framework.pagination import PageNumberPagination
 # Create your views here.
 
 
@@ -87,3 +88,22 @@ class ResendOTPView(APIView):
 
         send_otp_to_email(user)
         return Response({"message": "নতুন OTP ইমেইলে পাঠানো হয়েছে ✅"}, status=status.HTTP_200_OK)
+    
+
+class CustomPagination(PageNumberPagination):
+    page_size = 20  
+    page_size_query_param = 'page_size'  
+    max_page_size = 100  
+
+class AllUserViews(APIView):
+    def get(self, request):
+        role = request.query_params.get('role', None)
+
+        if role:
+            users = CustomUser.objects.filter(role=role)
+        else:
+            users = CustomUser.objects.all()
+        paginator = CustomPagination()
+        paginated_users = paginator.paginate_queryset(users, request)
+        serializer = UserSerializer(paginated_users, many=True)
+        return paginator.get_paginated_response(serializer.data)

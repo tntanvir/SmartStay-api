@@ -25,3 +25,24 @@ class RoomReviewViews(APIView):
             serializer.save(user=request.user)
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response({'error':serializer.errors},status=status.HTTP_400_BAD_REQUEST)
+    def patch(self,request,pk=None):
+        try:
+            review =get_object_or_404(RoomReviews,pk=pk)
+        except RoomReviews.DoesNotExist:
+            return Response({"detail": "Data not found."}, status=status.HTTP_404_NOT_FOUND)
+        if review.user != request.user:
+            return Response({"error": "You are not allowed to edit this room."}, status=status.HTTP_403_FORBIDDEN)
+        serializer = ReviewSerializer(review,data=request.data,partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def delete(self,request,pk=None):
+        try:
+            review =get_object_or_404(RoomReviews,pk=pk)
+        except RoomReviews.DoesNotExist:
+            return Response({"detail": "Data not found."}, status=status.HTTP_404_NOT_FOUND)
+        if review.user != request.user:
+            return Response({"error": "You are not allowed to delete this room."}, status=status.HTTP_403_FORBIDDEN)
+        review.delete()
+        return Response({"message": "Room deleted successfully"}, status=status.HTTP_204_NO_CONTENT)

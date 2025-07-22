@@ -24,5 +24,7 @@ urlpatterns = [
     path('auth/', include('authsystem.urls')),
     path('room/', include('room.urls')),
     path('review/', include('reviews.urls')),
+    path('booking/', include('booking.urls')),
+    path('payment/', include('payment.urls')),
     # re_path(r'^.*$', Custom_Endpoint),
 ]

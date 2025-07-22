@@ -14,16 +14,13 @@ class RoomModel(models.Model):
     location = models.CharField(max_length=700)
     district = models.CharField(max_length=300,blank=True,null=True)
     price = models.FloatField()
-
     ROOM_TYPES = (
         ('ac', 'AC'),
         ('wifi', 'WIFI'),
         ('tv', 'TV'),
         ('geyser', 'Geyser'),
     )
-
     types = MultiSelectField(choices=ROOM_TYPES, max_length=100)
-
     max_capacity = models.CharField(
         max_length=100,
         choices=[
@@ -35,7 +32,8 @@ class RoomModel(models.Model):
         blank=True
     )
     created_at = models.DateTimeField(auto_now_add=True,blank=True,null=True)
-
+    is_booking = models.BooleanField(default=False)
+    
     def __str__(self):
         return self.title
 

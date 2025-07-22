@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'authsystem',
     'room',
     'reviews',
+    'booking',
+    'payment',
     
 ]
 REST_FRAMEWORK = {
@@ -157,3 +159,7 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+
+STRIPE_TEST_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY')  
+STRIPE_TEST_SECRET_KEY = config('STRIPE_SECRET_KEY') 
