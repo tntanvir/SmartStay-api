@@ -12,8 +12,12 @@ class RoomModel(models.Model):
     docs = models.TextField(max_length=900)
     image = models.URLField(max_length=700)
     location = models.CharField(max_length=700)
-    district = models.CharField(max_length=300,blank=True,null=True)
+    country = models.CharField(max_length=300,blank=True,null=True)
     price = models.FloatField()
+    bed = models.IntegerField(blank=True,null=True)
+    bath = models.IntegerField(blank=True,null=True)
+    sqft = models.IntegerField(blank=True,null=True)
+     
     ROOM_TYPES = (
         ('ac', 'AC'),
         ('wifi', 'WIFI'),

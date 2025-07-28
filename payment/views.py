@@ -26,6 +26,7 @@ class PaymentViews(APIView):
         try:
             booking = BookingModel.objects.get(id=booking_id)
             amount = booking.total_price
+            
         except BookingModel.DoesNotExist:
                 return Response({'error': 'Booking not found'}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -41,6 +42,7 @@ class PaymentViews(APIView):
                 'amount': amount,
                 'currency': currency,
                 'user_email': user_email,
+                'booking_id':booking_id,
                 'stripe_payment_id': intent['id']
             }
             serializer = PaymentSerializer(data=data)

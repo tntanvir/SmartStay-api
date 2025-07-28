@@ -5,6 +5,7 @@ from rest_framework import status
 from .serializers import RoomSerializers
 from .models import RoomModel
 from rest_framework.generics import get_object_or_404
+from django.db.models import Q
 
 # Create your views here.
 class CustomRoomPagination(PageNumberPagination):
@@ -14,6 +15,33 @@ class CustomRoomPagination(PageNumberPagination):
 
 class RoomViews(APIView):
     def get(self, request, pk=None):
+        filters = Q()
+        filters &= Q(is_booking=False)
+        max_capacity = request.query_params.get('max_capacity', None)
+        if max_capacity:
+            filters &= Q(max_capacity=max_capacity)
+
+        
+        price_filter = request.query_params.get('price', None)
+        if price_filter == 'low_to_high':
+            rooms = RoomModel.objects.filter(filters).order_by('price')
+        elif price_filter == 'high_to_low':
+            rooms = RoomModel.objects.filter(filters).order_by('-price')
+        else:
+            rooms = RoomModel.objects.filter(filters)
+
+        
+        room_types = request.query_params.getlist('types', [])
+        if room_types:
+            
+            for room_type in room_types:
+                rooms = rooms.filter(types__contains=room_type)
+
+        
+        country = request.query_params.get('country', None)
+        if country:
+            rooms = rooms.filter(country__iexact=country)  
+
         if pk:
             try:
                 room = RoomModel.objects.get(pk=pk)
@@ -22,10 +50,10 @@ class RoomViews(APIView):
             except RoomModel.DoesNotExist:
                 return Response({"detail": "Data not found."}, status=status.HTTP_404_NOT_FOUND)
         else:
-            room = RoomModel.objects.all()
+            # Apply pagination
             paginate = CustomRoomPagination()
-            result_page = paginate.paginate_queryset(room,request)
-            serializers = RoomSerializers(result_page,many=True)
+            result_page = paginate.paginate_queryset(rooms, request)
+            serializers = RoomSerializers(result_page, many=True)
             return paginate.get_paginated_response(serializers.data)
     
     def post(self,request):

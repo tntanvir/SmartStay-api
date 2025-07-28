@@ -7,3 +7,4 @@ class PaymentModel(models.Model):
     stripe_payment_id = models.CharField(max_length=250,blank=True,null=True)
     user_email = models.EmailField()
     created_at = models.DateTimeField(auto_now_add=True)
+    booking_id = models.CharField(blank=True,null=True)

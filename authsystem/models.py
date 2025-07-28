@@ -16,6 +16,7 @@ class CustomUser(AbstractUser):
         ('user', 'User'),
         ('hotel owner', 'Hotel Owner')
     ], default='user', blank=True, null=True)
+    
 
 class EmailOTP(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
