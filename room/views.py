@@ -9,7 +9,7 @@ from django.db.models import Q
 
 # Create your views here.
 class CustomRoomPagination(PageNumberPagination):
-    page_size = 12  
+    page_size = 5  
     page_size_query_param = 'page_size'
     max_page_size = 20
 
@@ -40,7 +40,7 @@ class RoomViews(APIView):
         
         country = request.query_params.get('country', None)
         if country:
-            rooms = rooms.filter(country__iexact=country)  
+            rooms = rooms.filter(country__icontains=country)  
 
         if pk:
             try:

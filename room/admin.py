@@ -5,6 +5,6 @@ from .models import RoomModel
 
 @admin.register(RoomModel)
 class RoomAdmin(admin.ModelAdmin):
-    list_display=('user','location','price')
+    list_display=('user','location','price','is_booking')
     search_fields = ('user', 'location')
     list_filter = (['types'])
