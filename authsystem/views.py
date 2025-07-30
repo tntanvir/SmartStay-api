@@ -2,13 +2,14 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from .serializers import RegisterUserSerializer,UserSerializer
+from .serializers import RegisterUserSerializer,UserSerializer,PasswordChangeSerializer
 from .models import CustomUser,EmailOTP
 from django.contrib.auth import authenticate, login
 from rest_framework_simplejwt.tokens import RefreshToken
 from .utils import send_otp_to_email
 from django.conf import settings
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 
 
@@ -89,6 +90,24 @@ class ResendOTPView(APIView):
         send_otp_to_email(user)
         return Response({"message": "নতুন OTP ইমেইলে পাঠানো হয়েছে ✅"}, status=status.HTTP_200_OK)
     
+
+    
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]  
+
+    def post(self, request, *args, **kwargs):
+        serializer = PasswordChangeSerializer(data=request.data, context={'request': request})
+        
+        if serializer.is_valid():
+            user = request.user  # Get the logged-in user
+            new_password = serializer.validated_data['new_password']
+            user.set_password(new_password)  # Update the user's password
+            user.save()
+            return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class CustomPagination(PageNumberPagination):
     page_size = 20  

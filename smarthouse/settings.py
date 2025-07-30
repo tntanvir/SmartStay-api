@@ -48,12 +48,14 @@ INSTALLED_APPS = [
     'reviews',
     'booking',
     'payment',
+    'drf_spectacular',
     
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -163,3 +165,12 @@ CORS_ALLOW_CREDENTIALS = True
 
 STRIPE_TEST_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY')  
 STRIPE_TEST_SECRET_KEY = config('STRIPE_SECRET_KEY') 
+
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'SMARTHOUSE',
+    'DESCRIPTION': 'A detailed description of your API.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,  
+}

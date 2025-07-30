@@ -87,3 +87,12 @@ class RoomViews(APIView):
             return Response({"error": "You are not allowed to delete this room."}, status=status.HTTP_403_FORBIDDEN)
         room.delete()
         return Response({"message": "Room deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+class LatestRoom(APIView):
+    def get(self,request):
+        data = RoomModel.objects.all()[:6]
+        serializers = RoomSerializers(data,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)
