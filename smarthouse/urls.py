@@ -27,11 +27,13 @@ urlpatterns = [
     path('review/', include('reviews.urls')),
     path('booking/', include('booking.urls')),
     path('payment/', include('payment.urls')),
-    # re_path(r'^.*$', Custom_Endpoint),
-
-
+    
 
     path('schema/', SpectacularAPIView.as_view(), name='schema'),  # The OpenAPI schema
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),  # Swagger UI
     path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),  # ReDoc UI
+
+
+    re_path(r'^.*$', Custom_Endpoint),
+
 ]

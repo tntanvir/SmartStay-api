@@ -4,12 +4,13 @@ from rest_framework.views import APIView
 from rest_framework import status
 from .serializers import RegisterUserSerializer,UserSerializer,PasswordChangeSerializer
 from .models import CustomUser,EmailOTP
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login,logout
 from rest_framework_simplejwt.tokens import RefreshToken
 from .utils import send_otp_to_email
 from django.conf import settings
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
+
 # Create your views here.
 
 
@@ -126,3 +127,18 @@ class AllUserViews(APIView):
         paginated_users = paginator.paginate_queryset(users, request)
         serializer = UserSerializer(paginated_users, many=True)
         return paginator.get_paginated_response(serializer.data)
+    
+class SingOUT(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        tokenr  = request.data.get('token')
+        if tokenr:
+            try:
+                token = RefreshToken(tokenr)
+                token.blacklist()
+                logout(request)
+                return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "No token provided"}, status=status.HTTP_400_BAD_REQUEST)
+        
