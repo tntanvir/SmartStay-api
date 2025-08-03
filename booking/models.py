@@ -34,15 +34,9 @@ class BookingModel(models.Model):
     def is_available(self):
         bookings = BookingModel.objects.filter(room=self.room)
         for booking in bookings:
-            if (timezone.now().date() <= booking.end_date and self.end_date >= timezone.now().date()):
-                self.room.is_booking=True
-                self.room.save()
-                return False
-            else:
-                self.room.is_booking=False
-                self.room.save()
-        return True
+            if (timezone.now().date() <= booking.end_date and self.end_date >= timezone.now().date() and timezone.now().date() >=self.start_date):
+                return True
+        return False
     def total_price(self):
         return ((self.end_date-self.start_date).days)*self.room.price
-
 

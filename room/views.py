@@ -6,6 +6,7 @@ from .serializers import RoomSerializers
 from .models import RoomModel
 from rest_framework.generics import get_object_or_404
 from django.db.models import Q
+from datetime import datetime
 
 # Create your views here.
 class CustomRoomPagination(PageNumberPagination):
@@ -16,7 +17,7 @@ class CustomRoomPagination(PageNumberPagination):
 class RoomViews(APIView):
     def get(self, request, pk=None):
         filters = Q()
-        filters &= Q(is_booking=False)
+        # filters &= Q(is_booking=False)
         max_capacity = request.query_params.get('max_capacity', None)
         if max_capacity:
             filters &= Q(max_capacity=max_capacity)
@@ -96,3 +97,34 @@ class LatestRoom(APIView):
         data = RoomModel.objects.all()[:6]
         serializers = RoomSerializers(data,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
+    
+class RoomAvailabilityCheck(APIView):
+    def get(self, request, pk):
+        try:
+            room = RoomModel.objects.get(pk=pk)
+        except RoomModel.DoesNotExist:
+            return Response({"detail": "Room not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        start_str = request.query_params.get('start_date')
+        end_str = request.query_params.get('end_date')
+
+        if not start_str or not end_str:
+            return Response({"error": "start_date and end_date are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            requested_start = datetime.strptime(start_str, '%d-%m-%y').date()
+            requested_end = datetime.strptime(end_str, '%d-%m-%y').date()
+        except ValueError:
+            return Response({"error": "Invalid date format. Use DD-MM-YY."}, status=status.HTTP_400_BAD_REQUEST)
+
+        for booking in room.booking_data():
+            booked_start = datetime.strptime(booking['start'], '%d-%m-%y').date()
+            booked_end = datetime.strptime(booking['end'], '%d-%m-%y').date()
+
+            if requested_start <= booked_end and requested_end >= booked_start:
+                return Response({
+                    "available": False,
+                    "conflict": booking
+                }, status=status.HTTP_200_OK)
+
+        return Response({"available": True}, status=status.HTTP_200_OK)

@@ -8,4 +8,4 @@ class RoomSerializers(serializers.ModelSerializer):
     types = serializers.ListField(child=serializers.ChoiceField(choices=RoomModel.ROOM_TYPES))
     class Meta:
         model = RoomModel
-        fields = ['id','user','title','docs','image','location','bed','bath','sqft','country','types','max_capacity','price','is_booking','created_at']
+        fields = ['id','user','title','docs','image','location','bed','bath','sqft','country','types','max_capacity','price','created_at']

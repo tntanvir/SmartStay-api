@@ -5,7 +5,7 @@ from rest_framework import status
 from .serializers import BookingSerializers
 from .models import BookingModel
 from rest_framework.generics import get_object_or_404
-
+from datetime import date
 
 class BookingViews(APIView):
     def get(self,request,pk=None):
@@ -22,6 +22,9 @@ class BookingViews(APIView):
     def post(self,request):
         serializer=BookingSerializers(data=request.data)
         if serializer.is_valid():
+            start_date = serializer.validated_data.get('start_date')
+            if start_date < date.today():
+                return Response({"error": "Start date is in the past."}, status=status.HTTP_400_BAD_REQUEST)
             serializer.save(user=request.user)
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
