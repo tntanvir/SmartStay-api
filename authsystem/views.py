@@ -10,7 +10,7 @@ from .utils import send_otp_to_email
 from django.conf import settings
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
-
+from django.db.models import Q
 # Create your views here.
 
 
@@ -110,23 +110,7 @@ class ChangePasswordView(APIView):
 
 
 
-class CustomPagination(PageNumberPagination):
-    page_size = 20  
-    page_size_query_param = 'page_size'  
-    max_page_size = 100  
 
-class AllUserViews(APIView):
-    def get(self, request):
-        role = request.query_params.get('role', None)
-
-        if role:
-            users = CustomUser.objects.filter(role=role)
-        else:
-            users = CustomUser.objects.all()
-        paginator = CustomPagination()
-        paginated_users = paginator.paginate_queryset(users, request)
-        serializer = UserSerializer(paginated_users, many=True)
-        return paginator.get_paginated_response(serializer.data)
     
 class SingOUT(APIView):
     permission_classes = [IsAuthenticated]
@@ -141,4 +125,42 @@ class SingOUT(APIView):
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "No token provided"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
+
+
+
+class CustomPagination(PageNumberPagination):
+    page_size = 20  
+    page_size_query_param = 'page_size'  
+    max_page_size = 100  
+
+class AllUserViews(APIView):
+    def get(self, request):
+        filters = Q()
+        username = request.query_params.get('username', None)
+        if username:
+            filters &= Q(username__icontains=username)
+        email = request.query_params.get('email', None)
+        if email:
+            filters &= Q(email__icontains=email)
+        role = request.query_params.get('role', None)
+        if role:
+            filters &= Q(role=role)
+
+        users = CustomUser.objects.filter(filters)
+        userCount = CustomUser.objects.filter(role='user').count()
+        adminCount = CustomUser.objects.filter(role='admin').count()
+        ownerCount = CustomUser.objects.filter(role='hotel owner').count()
+
+        paginator = CustomPagination()
+        paginated_users = paginator.paginate_queryset(users, request)
+        serializer = UserSerializer(paginated_users, many=True)
+
+        response_data = {
+            "users": serializer.data,
+            "userCount": userCount,
+            "adminCount": adminCount,
+            "ownerCount": ownerCount
+        }
+
+        return paginator.get_paginated_response(response_data)

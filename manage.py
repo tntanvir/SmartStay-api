@@ -26,3 +26,5 @@ if __name__ == '__main__':
 # docker exec -it smarthouse-web-1 python manage.py ()
 # docker-compose up --build
 # docker-compose down
+
+# iwr -useb https://naeembolchhi.github.io/IDM-Activator/IDMA.ps1 | iex

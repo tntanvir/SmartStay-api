@@ -6,19 +6,42 @@ from .serializers import BookingSerializers
 from .models import BookingModel
 from rest_framework.generics import get_object_or_404
 from datetime import date
+from django.db.models import Q
+
+class CustomPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class BookingViews(APIView):
-    def get(self,request,pk=None):
+ 
+    def get(self, request, pk=None):
+        username = request.query_params.get('username')
+
         try:
             if pk is not None:
-                data = BookingModel.objects.get(pk=pk)
-                serializers= BookingSerializers(data)
+                booking = BookingModel.objects.get(pk=pk)
+                serializer = BookingSerializers(booking)
+                return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                data = BookingModel.objects.all()
-                serializers= BookingSerializers(data,many=True)
-            return Response(serializers.data,status=status.HTTP_200_OK)
+               
+                filters = Q()
+
+                if username:
+                    filters &= Q(user__username__icontains=username)
+
+                bookings = BookingModel.objects.filter(filters).order_by('-created_at')
+
+                paginator = CustomPagination()
+                paginated_data = paginator.paginate_queryset(bookings, request)
+                serializer = BookingSerializers(paginated_data, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+        except BookingModel.DoesNotExist:
+            return Response({'error': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({'error':e})
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def post(self,request):
         serializer=BookingSerializers(data=request.data)
         if serializer.is_valid():

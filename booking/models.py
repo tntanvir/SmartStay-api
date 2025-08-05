@@ -37,6 +37,8 @@ class BookingModel(models.Model):
             if (timezone.now().date() <= booking.end_date and self.end_date >= timezone.now().date() and timezone.now().date() >=self.start_date):
                 return True
         return False
+    def total_days(self):
+        return (self.end_date - self.start_date).days
     def total_price(self):
         return ((self.end_date-self.start_date).days)*self.room.price
 

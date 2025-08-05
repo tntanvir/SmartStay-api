@@ -9,3 +9,11 @@ class RoomSerializers(serializers.ModelSerializer):
     class Meta:
         model = RoomModel
         fields = ['id','user','title','docs','image','location','bed','bath','sqft','country','types','max_capacity','price','created_at']
+
+class CustomRoomSerializers(serializers.ModelSerializer):
+
+    
+    class Meta:
+        model = RoomModel
+        fields = ['id',  'title',  'image', 'location',  'country',  'max_capacity', 'price' ]
+        
