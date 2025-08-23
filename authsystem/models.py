@@ -11,6 +11,7 @@ class CustomUser(AbstractUser):
     phone = models.CharField(max_length=15, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     profile = models.URLField(max_length=700, blank=True, null=True)
+    activity = models.BooleanField(default=True,blank=True,null=True)
     role = models.CharField(max_length=50, choices=[
         ('admin', 'Admin'),
         ('user', 'User'),

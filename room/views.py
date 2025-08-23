@@ -17,7 +17,10 @@ class CustomRoomPagination(PageNumberPagination):
 class RoomViews(APIView):
     def get(self, request, pk=None):
         filters = Q()
-        # filters &= Q(is_booking=False)
+        if request.user.is_authenticated:
+            filters &= Q(user=request.user)
+        
+        
         max_capacity = request.query_params.get('max_capacity', None)
         if max_capacity:
             filters &= Q(max_capacity=max_capacity)
@@ -58,9 +61,12 @@ class RoomViews(APIView):
             return paginate.get_paginated_response(serializers.data)
     
     def post(self,request):
-        if request.user.role not in ['admin', 'hotel_owner']:
+        if request.user.role not in ['admin', 'hotel owner']:
             return Response({"error": "You do not have permission to create a room."}, status=status.HTTP_403_FORBIDDEN)
+        if not request.user.activity:
+            return Response({"error": "Your account is not active. Please contact support."}, status=status.HTTP_403_FORBIDDEN)
         serializers = RoomSerializers(data=request.data)
+        print(request.data)
         if serializers.is_valid():
             serializers.save(user=request.user)
             return Response(serializers.data,status=status.HTTP_201_CREATED)
@@ -128,3 +134,4 @@ class RoomAvailabilityCheck(APIView):
                 }, status=status.HTTP_200_OK)
 
         return Response({"available": True}, status=status.HTTP_200_OK)
+    

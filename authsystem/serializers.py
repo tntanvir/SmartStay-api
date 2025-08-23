@@ -29,13 +29,13 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'name', 'phone', 'role', 'address', 'profile', 'is_active']
+        fields = ['id', 'username', 'email', 'name', 'phone', 'role', 'address', 'profile', 'is_active' , 'activity']
         read_only_fields = ['id', 'username', 'email', 'is_active']
 
 
 
 
-class PasswordChangeSerializer(serializers.Serializer):
+class PasswordChangeSerializer(serializers.Serializer): 
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)

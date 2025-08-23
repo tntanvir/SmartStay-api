@@ -1,21 +1,28 @@
-# Use an official Python runtime as a parent image
-FROM python:3.10-slim
+FROM python:3.11-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# Set work directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Install dependencies
-COPY requirements.txt /app/
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Install required system dependencies
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    bash \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy project
-COPY . /app/
+# Copy and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Collect static files (optional, for production)
-# RUN python manage.py collectstatic --noinput
+# Copy project files into the container
+COPY . .
 
-CMD ["gunicorn", "smarthouse.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Expose port 8000 for Django server
+EXPOSE 8000
+
+# Run migrations and start the Django development server
+CMD ["bash", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]

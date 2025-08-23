@@ -5,10 +5,20 @@ from rest_framework import status
 from .serializers import ReviewSerializer
 from .models import RoomReviews
 from rest_framework.generics import get_object_or_404
+import time
+from celery import shared_task
 
-
+@shared_task
+def test_task():
+    for i in range(10):
+        print(f"Test task: {i}")
+        time.sleep(1)
+    return "Test task completed."
 class RoomReviewViews(APIView):
     def get(self,request,pk=None):
+        print("###"*30)
+        # test_task()
+        test_task.delay()    
         try:
             if pk is not None:
                 review =get_object_or_404(RoomReviews,pk=pk)

@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
 
 #  source env/Scripts/activate 
-# docker exec -it smarthouse-web-1 python manage.py ()
+# docker exec -it smarthouse_django python manage.py ()
 # docker-compose up --build
 # docker-compose down
 

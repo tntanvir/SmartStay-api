@@ -12,5 +12,6 @@ urlpatterns = [
     path('change-password', views.ChangePasswordView.as_view(), name='change-password'),
     path('singout', views.SingOUT.as_view(), name='singout'),
     path('refresh', TokenRefreshView.as_view(), name='token_refresh'),
+    path('update-status/<int:pk>', views.UpdateStatusView.as_view(), name='update-status'),
 
 ]

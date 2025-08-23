@@ -24,17 +24,17 @@ class BookingModel(models.Model):
         default='unpaid'
     )
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
     
-    def __str__(self):
-        return f"Booking for {self.room.title} by {self.user.username}"
-    
-    def is_active(self):
-        return timezone.now().date() <= self.end_date and self.status == 'confirmed'
+    # def is_active(self):
+    #     return timezone.now().date() <= self.end_date and self.status == 'confirmed'
 
+
+    # room availability and room a jaoya jabe ki na
     def is_available(self):
         bookings = BookingModel.objects.filter(room=self.room)
         for booking in bookings:
-            if (timezone.now().date() <= booking.end_date and self.end_date >= timezone.now().date() and timezone.now().date() >=self.start_date):
+            if (timezone.now().date() <= booking.end_date and self.end_date >= timezone.now().date() and timezone.now().date() >=self.start_date and  self.status == 'confirmed' ):
                 return True
         return False
     def total_days(self):
@@ -42,3 +42,13 @@ class BookingModel(models.Model):
     def total_price(self):
         return ((self.end_date-self.start_date).days)*self.room.price
 
+    def checkOut(self):
+        return timezone.now().date() > self.end_date and self.status == 'confirmed' and self.payment_status == 'paid'
+    def auto_delete_unpaid_if_expired(self):
+        if (
+            timezone.now().date() > self.end_date and
+            self.payment_status == 'unpaid'
+        ):
+            self.delete()
+    class Meta:
+        ordering = ['-created_at']

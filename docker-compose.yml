@@ -1,13 +1,176 @@
-version: '3.9'
+# version: '3.8'
+
+# services:
+#   # PostgreSQL Database
+#   postgres:
+#     image: postgres:14
+#     container_name: smarthouse_postgres
+#     environment:
+#       POSTGRES_DB: smarthouse_db
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: admin
+#     volumes:
+#       - pgdata:/var/lib/postgresql/data
+#     ports:
+#       - "5432:5432"
+#     networks:
+#       - smarthouse_network
+
+#   # Redis Cache
+#   redis:
+#     image: redis:alpine
+#     container_name: smarthouse_redis
+#     ports:
+#       - "6379:6379"
+#     networks:
+#       - smarthouse_network
+
+#   # Django Application
+#   web:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     container_name: smarthouse_django
+#     command: >
+#       sh -c "sleep 10 &&
+#              python manage.py migrate &&
+#              python manage.py makemigrations &&
+#              python manage.py runserver 0.0.0.0:8000"
+#     volumes:
+#       - .:/app
+#     ports:
+#       - "8000:8000"
+#     depends_on:
+#       - redis
+#       - postgres
+#     networks:
+#       - smarthouse_network
+
+#   # Celery Worker
+#   worker:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     container_name: smarthouse_celery
+#     command: celery -A smarthouse worker --loglevel=info --pool=solo
+#     volumes:
+#       - .:/app
+#     depends_on:
+#       - redis
+#       - web
+#     networks:
+#       - smarthouse_network
+
+#   # pgAdmin for PostgreSQL management
+#   pgadmin:
+#     image: dpage/pgadmin4:latest
+#     container_name: smarthouse_pgadmin
+#     environment:
+#       PGADMIN_DEFAULT_EMAIL: postgres@gmail.com
+#       PGADMIN_DEFAULT_PASSWORD: admin
+#     ports:
+#       - "5050:80"
+#     volumes:
+#       - pgadmin_data:/var/lib/pgadmin
+#     depends_on:
+#       - postgres
+#     networks:
+#       - smarthouse_network
+
+# # Volumes for persistent data
+# volumes:
+#   pgdata:
+#   pgadmin_data:
+
+# # Custom bridge network
+# networks:
+#   smarthouse_network:
+#     driver: bridge
+
 
 services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14
+    container_name: smarthouse_postgres
+    environment:
+      POSTGRES_DB: smarthouse_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - smarthouse_network
+
+  # Redis Cache
+  redis:
+    image: redis:alpine
+    container_name: smarthouse_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - smarthouse_network
+
+  # Django Application
   web:
-    build: .
-    # command: gunicorn smarthouse.wsgi:application --bind 0.0.0.0:8000
-    command: python manage.py runserver 0.0.0.0:8000
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smarthouse_django
+    command: >
+      sh -c "sleep 10 &&
+             python manage.py migrate &&
+             python manage.py makemigrations &&
+             python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
     ports:
       - "8000:8000"
-    env_file:
-      - .env
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - smarthouse_network
+
+  # Celery Worker
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smarthouse_celery
+    command: celery -A smarthouse worker --loglevel=info --pool=solo
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - web
+    networks:
+      - smarthouse_network
+
+  # pgAdmin for PostgreSQL management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: smarthouse_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: postgres@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - smarthouse_network
+
+# Volumes for persistent data
+volumes:
+  pgdata:
+  pgadmin_data:
+
+# Custom bridge network
+networks:
+  smarthouse_network:
+    driver: bridge

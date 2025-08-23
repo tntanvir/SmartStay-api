@@ -9,8 +9,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .utils import send_otp_to_email
 from django.conf import settings
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated , IsAdminUser
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 # Create your views here.
 
 
@@ -37,6 +38,7 @@ class LoginUserView(APIView):
             return Response({
                 "message": "Login successful",
                 "user":{
+                "id": user.id,
                 "username": user.username,
                 "email": user.email,
                 "name": user.name,
@@ -164,3 +166,20 @@ class AllUserViews(APIView):
         }
 
         return paginator.get_paginated_response(response_data)
+
+
+class UpdateStatusView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, pk=None):
+        user = get_object_or_404(CustomUser, pk=pk)
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk=None):
+        user = get_object_or_404(CustomUser, pk=pk)
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
