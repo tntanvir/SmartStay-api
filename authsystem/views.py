@@ -45,7 +45,11 @@ class LoginUserView(APIView):
                 "phone": user.phone,
                 "address": user.address,
                 "role": user.role,
-                "profile": user.profile
+                "profile": user.profile,
+                "is_active": user.is_active,
+                "joined": user.date_joined,
+                "last_login": user.last_login,
+                "is_verified": user.activity,
                 },
                 "refresh": str(token),
                 "access": str(token.access_token)
@@ -110,6 +114,18 @@ class ChangePasswordView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+# class ForgetPasswordView(APIView):
+#     def post(self, request):
+#         email = request.data.get("email")
+
+#         # try:
+#         #     user = CustomUser.objects.get(email=email)
+#         # except CustomUser.DoesNotExist:
+#         #     return Response({"message": "এই ইমেইলে কোন ইউজার নেই।"}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # send_otp_to_email(user)
+#         # return Response({"message": "নতুন OTP ইমেইলে পাঠানো হয়েছে ✅"}, status=status.HTTP_200_OK)
 
 
 

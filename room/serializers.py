@@ -16,4 +16,11 @@ class CustomRoomSerializers(serializers.ModelSerializer):
     class Meta:
         model = RoomModel
         fields = ['id',  'title',  'image', 'location',  'country',  'max_capacity', 'price' ]
-        
+
+class TopRoomSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    total_bookings = serializers.IntegerField(read_only=True)
+    
+    class Meta:
+        model = RoomModel
+        fields = '__all__'

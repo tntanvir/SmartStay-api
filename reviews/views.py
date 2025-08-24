@@ -16,7 +16,7 @@ def test_task():
     return "Test task completed."
 class RoomReviewViews(APIView):
     def get(self,request,pk=None):
-        print("###"*30)
+        
         # test_task()
         test_task.delay()    
         try:

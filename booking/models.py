@@ -10,7 +10,7 @@ User = settings.AUTH_USER_MODEL
 class BookingModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    room = models.ForeignKey(RoomModel, on_delete=models.CASCADE)
+    room = models.ForeignKey(RoomModel, on_delete=models.CASCADE,related_name='bookingmodel')
     start_date = models.DateField()
     end_date = models.DateField()
     status = models.CharField(

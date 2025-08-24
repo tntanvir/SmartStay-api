@@ -7,4 +7,4 @@ class BookingConfig(AppConfig):
 
     def ready(self):
         import booking.signals
-        print("🔔 Booking signals loaded!") 
+       

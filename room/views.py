@@ -7,6 +7,9 @@ from .models import RoomModel
 from rest_framework.generics import get_object_or_404
 from django.db.models import Q
 from datetime import datetime
+from django.db.models import Count
+from booking.models import BookingModel
+from room.serializers import TopRoomSerializer
 
 # Create your views here.
 class CustomRoomPagination(PageNumberPagination):
@@ -44,7 +47,7 @@ class RoomViews(APIView):
         
         country = request.query_params.get('country', None)
         if country:
-            rooms = rooms.filter(country__icontains=country)  
+            rooms = rooms.filter(location__icontains=country)  
 
         if pk:
             try:
@@ -103,7 +106,23 @@ class LatestRoom(APIView):
         data = RoomModel.objects.all()[:6]
         serializers = RoomSerializers(data,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
+
+class MostBooking(APIView):
+   
     
+    def get(self, request):
+        # Annotate with only confirmed bookings count using Q object
+        top_rooms = (
+            RoomModel.objects
+            .annotate(total_bookings=Count('bookingmodel'))
+            .order_by('-total_bookings')[:5]
+        )
+
+        serializer = TopRoomSerializer(top_rooms, many=True)
+        return Response(serializer.data)
+
+    
+
 class RoomAvailabilityCheck(APIView):
     def get(self, request, pk):
         try:
