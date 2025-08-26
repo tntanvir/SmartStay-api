@@ -29,6 +29,9 @@ SECRET_KEY = 'django-insecure-ld75y(c27yli%_hedx_*t^ysm1(p1yl@g8wa^l_kv-(_4*rei+
 DEBUG = True
 ALLOWED_HOSTS = ["*", "0.0.0.0", "localhost"]
 # ALLOWED_HOSTS = []
+CSRF_TRUSTED_ORIGINS = [
+    "https://smartstay-api-production.up.railway.app",
+]
 
 
 # Application definition
