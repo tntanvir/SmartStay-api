@@ -6,9 +6,9 @@
 #     image: postgres:14
 #     container_name: smarthouse_postgres
 #     environment:
-#       POSTGRES_DB: smarthouse_db
-#       POSTGRES_USER: postgres
-#       POSTGRES_PASSWORD: admin
+#       POSTGRES_DB: postgres
+#       POSTGRES_USER: postgres.xgvpfhgwzpvwjzxejwxn 
+#       POSTGRES_PASSWORD: 9OgQs8qYprMFKnRq
 #     volumes:
 #       - pgdata:/var/lib/postgresql/data
 #     ports:
@@ -88,22 +88,99 @@
 #     driver: bridge
 
 
-services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:14
-    container_name: smarthouse_postgres
-    environment:
-      POSTGRES_DB: smarthouse_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - smarthouse_network
+# # services:
+# #   # PostgreSQL Database
+# #   postgres:
+# #     image: postgres:14
+# #     container_name: smarthouse_postgres
+# #     environment:
+# #       POSTGRES_DB: smarthouse_db
+# #       POSTGRES_USER: postgres
+# #       POSTGRES_PASSWORD: admin
+# #     volumes:
+# #       - pgdata:/var/lib/postgresql/data
+# #     ports:
+# #       - "5432:5432"
+# #     networks:
+# #       - smarthouse_network
 
+# #   # Redis Cache
+# #   redis:
+# #     image: redis:alpine
+# #     container_name: smarthouse_redis
+# #     ports:
+# #       - "6379:6379"
+# #     networks:
+# #       - smarthouse_network
+
+# #   # Django Application
+# #   web:
+# #     build:
+# #       context: .
+# #       dockerfile: Dockerfile
+# #     container_name: smarthouse_django
+# #     command: >
+# #       sh -c "sleep 10 &&
+# #              python manage.py migrate &&
+# #              python manage.py makemigrations &&
+# #              python manage.py runserver 0.0.0.0:8000"
+# #     volumes:
+# #       - .:/app
+# #     ports:
+# #       - "8000:8000"
+# #     depends_on:
+# #       - redis
+# #       - postgres
+# #     networks:
+# #       - smarthouse_network
+
+# #   # Celery Worker
+# #   worker:
+# #     build:
+# #       context: .
+# #       dockerfile: Dockerfile
+# #     container_name: smarthouse_celery
+# #     command: celery -A smarthouse worker --loglevel=info --pool=solo
+# #     volumes:
+# #       - .:/app
+# #     depends_on:
+# #       - redis
+# #       - web
+# #     networks:
+# #       - smarthouse_network
+
+# #   # pgAdmin for PostgreSQL management
+# #   pgadmin:
+# #     image: dpage/pgadmin4:latest
+# #     container_name: smarthouse_pgadmin
+# #     environment:
+# #       PGADMIN_DEFAULT_EMAIL: postgres@gmail.com
+# #       PGADMIN_DEFAULT_PASSWORD: admin
+# #     ports:
+# #       - "5050:80"
+# #     volumes:
+# #       - pgadmin_data:/var/lib/pgadmin
+# #     depends_on:
+# #       - postgres
+# #     networks:
+# #       - smarthouse_network
+
+# # # Volumes for persistent data
+# # volumes:
+# #   pgdata:
+# #   pgadmin_data:
+
+# # # Custom bridge network
+# # networks:
+# #   smarthouse_network:
+# #     driver: bridge
+
+
+
+
+version: '3.8'
+
+services:
   # Redis Cache
   redis:
     image: redis:alpine
@@ -130,7 +207,17 @@ services:
       - "8000:8000"
     depends_on:
       - redis
-      - postgres
+    environment:
+        # POSTGRES_DB: postgres
+        # POSTGRES_USER: postgres.xgvpfhgwzpvwjzxejwxn   
+        # POSTGRES_PASSWORD: 9OgQs8qYprMFKnRq
+        # POSTGRES_HOST: aws-1-ap-southeast-1.pooler.supabase.com
+        # POSTGRES_PORT: 6543
+        POSTGRES_DB: railway
+        POSTGRES_USER: postgres   
+        POSTGRES_PASSWORD: vUOTlPdkPGwwaJlmLncKbNWFQepVkLEI
+        POSTGRES_HOST: shuttle.proxy.rlwy.net
+        POSTGRES_PORT: 58433
     networks:
       - smarthouse_network
 
@@ -149,25 +236,9 @@ services:
     networks:
       - smarthouse_network
 
-  # pgAdmin for PostgreSQL management
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: smarthouse_pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: postgres@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgres
-    networks:
-      - smarthouse_network
-
+# No local Postgres or pgAdmin since you're using Supabase
 # Volumes for persistent data
 volumes:
-  pgdata:
   pgadmin_data:
 
 # Custom bridge network
