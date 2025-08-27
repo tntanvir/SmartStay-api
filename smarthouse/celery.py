@@ -14,8 +14,8 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 
 # Explicitly register tasks
-app.autodiscover_tasks(lambda: ['room', 'reviews', 'booking', 'payment', 'analytics'])
-
+# app.autodiscover_tasks(lambda: ['room', 'reviews', 'booking', 'payment', 'analytics'])
+app.autodiscover_tasks()
 
 # Optional: Define a debug task
 @app.task(bind=True)

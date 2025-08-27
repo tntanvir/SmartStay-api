@@ -6,7 +6,7 @@ from .serializers import RegisterUserSerializer,UserSerializer,PasswordChangeSer
 from .models import CustomUser,EmailOTP
 from django.contrib.auth import authenticate, login,logout
 from rest_framework_simplejwt.tokens import RefreshToken
-from .utils import send_otp_to_email
+from .tasks import send_otp_to_email
 from django.conf import settings
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated , IsAdminUser
@@ -22,8 +22,8 @@ class RegisterUserView(APIView):
         serializer = RegisterUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            send_otp_to_email(user)
-            return Response({"message": "Check your email for OPT"},status=status.HTTP_201_CREATED)
+            send_otp_to_email.delay(user.id)
+            return Response({"message": "Check your email for OTP"},status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginUserView(APIView):
@@ -94,7 +94,7 @@ class ResendOTPView(APIView):
         if user.is_active:
             return Response({"message": "এই ইউজার ইতোমধ্যে একটিভ। OTP লাগবে না।"}, status=status.HTTP_400_BAD_REQUEST)
 
-        send_otp_to_email(user)
+        send_otp_to_email.delay(user.id)
         return Response({"message": "নতুন OTP ইমেইলে পাঠানো হয়েছে ✅"}, status=status.HTTP_200_OK)
     
 

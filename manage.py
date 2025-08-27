@@ -22,9 +22,3 @@ if __name__ == '__main__':
     main()
 
 
-#  source env/Scripts/activate 
-# docker exec -it smarthouse_django python manage.py ()
-# docker-compose up --build
-# docker-compose down
-
-# iwr -useb https://naeembolchhi.github.io/IDM-Activator/IDMA.ps1 | iex
