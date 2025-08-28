@@ -8,3 +8,6 @@ class PaymentModel(models.Model):
     user_email = models.EmailField()
     created_at = models.DateTimeField(auto_now_add=True)
     booking_id = models.CharField(blank=True,null=True)
+
+    class Meta:
+        ordering = ['-created_at']

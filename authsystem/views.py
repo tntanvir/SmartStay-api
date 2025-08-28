@@ -3,15 +3,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from .serializers import RegisterUserSerializer,UserSerializer,PasswordChangeSerializer
-from .models import CustomUser,EmailOTP
+from .models import CustomUser,EmailOTP,ForgetPasswordOTP
 from django.contrib.auth import authenticate, login,logout
 from rest_framework_simplejwt.tokens import RefreshToken
-from .tasks import send_otp_to_email
+from .tasks import send_otp_to_email,ForgetPasswordSendOTP
 from django.conf import settings
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated , IsAdminUser
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+
 # Create your views here.
 
 
@@ -47,9 +48,9 @@ class LoginUserView(APIView):
                 "role": user.role,
                 "profile": user.profile,
                 "is_active": user.is_active,
-                "joined": user.date_joined,
+                "date_joined": user.date_joined,
                 "last_login": user.last_login,
-                "is_verified": user.activity,
+                "activity": user.activity,
                 },
                 "refresh": str(token),
                 "access": str(token.access_token)
@@ -106,30 +107,55 @@ class ChangePasswordView(APIView):
         serializer = PasswordChangeSerializer(data=request.data, context={'request': request})
         
         if serializer.is_valid():
-            user = request.user  # Get the logged-in user
+            user = request.user  
             new_password = serializer.validated_data['new_password']
-            user.set_password(new_password)  # Update the user's password
+            user.set_password(new_password)  
             user.save()
             return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class ForgetPasswordView(APIView):
-#     def post(self, request):
-#         email = request.data.get("email")
+class ForgetPasswordView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response({"message": "ইমেইল প্রয়োজন।"}, status=status.HTTP_400_BAD_REQUEST)
 
-#         # try:
-#         #     user = CustomUser.objects.get(email=email)
-#         # except CustomUser.DoesNotExist:
-#         #     return Response({"message": "এই ইমেইলে কোন ইউজার নেই।"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            return Response({"message": "এই ইমেইলের কোন ব্যবহারকারী নেই।"}, status=status.HTTP_400_BAD_REQUEST)
 
-#         # send_otp_to_email(user)
-#         # return Response({"message": "নতুন OTP ইমেইলে পাঠানো হয়েছে ✅"}, status=status.HTTP_200_OK)
+        # Send OTP via Celery task
+        ForgetPasswordSendOTP.delay(user.id)
+        return Response({"message": "ইমেইলে Forget Password পাঠানো হয়েছে"}, status=status.HTTP_200_OK)
 
+class VerifyForgetPasswordOTPView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        otp = request.data.get("otp")
 
+        try:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            return Response({"message": "ইমেইল সঠিক নয়।"}, status=status.HTTP_400_BAD_REQUEST)
 
-    
+        try:
+            otp_obj = ForgetPasswordOTP.objects.filter(user=user, otp=otp).latest('created_at')
+        except ForgetPasswordOTP.DoesNotExist:
+            return Response({"message": "OTP সঠিক নয়।"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if otp_obj.is_expired():
+            return Response({"message": "OTP মেয়াদ শেষ হয়েছে।"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # OTP সঠিক হলে নতুন পাসওয়ার্ড সেট করুন
+        user.set_password(otp)
+        user.save()
+        otp_obj.delete()
+
+        return Response({"message": "পাসওয়ার্ড সফলভাবে রিসেট হয়েছে।"}, status=status.HTTP_200_OK)
+
 class SingOUT(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
@@ -145,6 +171,22 @@ class SingOUT(APIView):
         return Response({"error": "No token provided"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
+class MyProfile(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CustomPagination(PageNumberPagination):

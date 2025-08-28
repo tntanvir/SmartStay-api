@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser, EmailOTP
+from .models import CustomUser, EmailOTP,ForgetPasswordOTP
 # Register your models here.
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
@@ -9,4 +9,5 @@ class CustomUserAdmin(admin.ModelAdmin):
     
     
 admin.site.register(EmailOTP)
+admin.site.register(ForgetPasswordOTP)
 
